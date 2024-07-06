@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "View File";
+    string filePath = ViewBag.FilePath;
+    string extension = System.IO.Path.GetExtension(filePath).ToLower();
+    bool isImage = extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif";
+    bool isVideo = extension == ".mp4" || extension == ".webm";
+}
+
+<h1>View File</h1>
+
+@if (isImage)
+{
+    <img src="@Url.Action("StreamFile", "File", new { filePath = filePath })" alt="Image" />
+}
+else if (isVideo)
+{
+    <video controls>
+        <source src="@Url.Action("StreamFile", "File", new { filePath = filePath })" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+}
+else
+{
+    <p>Unsupported file type.</p>
+}

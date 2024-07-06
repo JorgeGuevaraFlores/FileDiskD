@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "File List";
+}
+
+<h1>Archivos</h1>
+
+<!-- Formulario para subir archivos -->
+<form method="post" action="@Url.Action("UploadFiles", "File")" enctype="multipart/form-data" class="mb-4">
+    <div class="form-group">
+        <label for="files">Select multiple files to upload:</label>
+        <input type="file" id="files" name="files" class="form-control-file" multiple />
+        <input type="hidden" name="path" value="@Url.Content(ViewBag.Path)" /> <!-- Convertir la ruta física en una ruta virtual -->
+    </div>
+    <button type="submit" class="btn btn-success">Upload Files</button>
+</form>
+
+@if (ViewBag.Entries != null)
+{
+    <form method="post" action="@Url.Action("DeleteSelectedFiles", "File")">
+        <input type="hidden" name="path" value="@ViewBag.Path" />
+
+        <div class="mb-4">
+            <h2 class="toggle-header" id="directories-toggle">Carpetas <i class="fas fa-chevron-down"></i></h2>
+            <div class="directories-section">
+                <div class="row">
+                    @foreach (var entry in ViewBag.Entries)
+                    {
+                        var isDirectory = System.IO.Directory.Exists(entry);
+                        var fileName = System.IO.Path.GetFileName(entry);
+                        if (isDirectory)
+                        {
+                            <div class="col-md-3 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                        <a href="@Url.Action("Index", "File", new { path = entry })" class="text-center">
+                                            <i class="fa fa-folder fa-3x"></i>
+                                            <p>@fileName</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h2 class="toggle-header" id="images-toggle">Imágenes <i class="fas fa-chevron-down"></i></h2>
+            <div class="images-section">
+                <div class="row">
+                    @foreach (var entry in ViewBag.Entries)
+                    {
+                        var isDirectory = System.IO.Directory.Exists(entry);
+                        var fileName = System.IO.Path.GetFileName(entry);
+                        if (!isDirectory)
+                        {
+                            string extension = System.IO.Path.GetExtension(entry).ToLower();
+                            if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif")
+                            {
+                                <div class="col-md-3 mb-4">
+                                    <div class="card h-100">
+                                        <a href="@Url.Action("StreamFile", "File", new { filePath = entry })" target="_blank" class="d-flex flex-column align-items-center justify-content-center">
+                                            <img src="@Url.Action("StreamFile", "File", new { filePath = entry })" alt="@fileName" class="img-fluid" style="max-height: 200px; object-fit: cover;" />
+                                            <p>@fileName</p>
+                                        </a>
+                                        <div class="text-center">
+                                            <input type="checkbox" name="selectedFiles" value="@entry" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h2 class="toggle-header" id="videos-toggle">Videos <i class="fas fa-chevron-down"></i></h2>
+            <div class="videos-section">
+                <div class="row">
+                    @foreach (var entry in ViewBag.Entries)
+                    {
+                        var isDirectory = System.IO.Directory.Exists(entry);
+                        var fileName = System.IO.Path.GetFileName(entry);
+                        if (!isDirectory)
+                        {
+                            string extension = System.IO.Path.GetExtension(entry).ToLower();
+                            if (extension == ".mp4" || extension == ".webm")
+                            {
+                                <div class="col-md-3 mb-4">
+                                    <div class="card h-100">
+                                        <a href="@Url.Action("StreamFile", "File", new { filePath = entry })" target="_blank" class="d-flex flex-column align-items-center justify-content-center">
+                                            <video controls class="img-fluid" style="max-height: 200px; object-fit: cover;">
+                                                <source src="@Url.Action("StreamFile", "File", new { filePath = entry })" type="video/@extension.TrimStart('.')">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <p>@fileName</p>
+                                        </a>
+                                        <div class="text-center">
+                                            <input type="checkbox" name="selectedFiles" value="@entry" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-danger">Delete Selected Files</button>
+    </form>
+}
+
+
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $(".toggle-header").click(function () {
+                $(this).find("i").toggleClass("fa-chevron-down fa-chevron-up");
+                $(this).next().slideToggle();
+            });
+        });
+    </script>
+}
